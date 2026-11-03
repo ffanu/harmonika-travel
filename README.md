@@ -20,6 +20,37 @@ Bahasa antarmuka: Indonesia. Mata uang: IDR.
 | Integrasi supplier | tidak tersedia (tidak ada kredensial) |
 | Kesetaraan fitur Traveloka | **tidak diklaim**; lihat `WORKFLOW.md` bagian keterbatasan |
 
+## Arah produk (baca ini dulu)
+
+Harmonika Travel adalah **metasearch/afiliasi**, bukan OTA: kita menampilkan dan
+membandingkan tawaran mitra, transaksi selesai di situs mitra. Karena itu
+**hanya fitur yang didukung Travelpayouts** yang dibangun. Ruang lingkup lengkap,
+matriks kapabilitas yang sudah diuji, dan fase pekerjaan ada di **`ROADMAP.md`**;
+alur teknis dan jebakannya di **`WORKFLOW.md`**.
+
+Kode katalog/booking lama masih ada di repo sebagai arsip teknis, tetapi bukan
+lagi alur utama dan tidak ditautkan dari navigasi.
+
+## Pencarian tiket (bentuk daftar)
+
+`/flights` menampilkan **daftar tawaran**, bukan kartu katalog:
+
+| Bagian | Isi |
+| --- | --- |
+| Tanpa asal/tujuan | form pencarian + 10 rute populer berharga (dari `city-directions`) |
+| Dengan asal/tujuan | baris tawaran: maskapai, jam berangkat → tiba, durasi, transit, penjual, harga, tombol **Pilih** |
+| Urutan | `sort=price` (default), `sort=duration`, `sort=depart` |
+| Filter | `stops=0`/`1`, `airline=XX`, `max=2000000` |
+| Tanggal lain | strip tanggal + harga dari `prices/calendar` |
+| Tanpa hasil | penjelasan + saran rute populer |
+
+Contoh: `/flights?from=CGK&to=DPS&sort=duration&stops=0`.
+
+Sumber data: `nearest-places-matrix` (kaya: partner, jam, deep link) digabung
+`prices/cheap` (variasi maskapai per jumlah transit), di-dedupe, maksimum 12
+baris. Harga hotel belum tersedia (API mitra 404), jadi `/hotels` masih memakai
+tautan pencarian Hotellook.
+
 ## Struktur URL
 
 | Alamat | Fungsi |
