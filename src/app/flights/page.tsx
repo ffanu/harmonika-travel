@@ -16,6 +16,14 @@ export const metadata = {
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+const originOptions = [
+  { code: "CGK", city: "Jakarta" },
+  { code: "SUB", city: "Surabaya" },
+  { code: "KNO", city: "Medan" },
+  { code: "UPG", city: "Makassar" },
+  { code: "DPS", city: "Bali" },
+];
+
 const money = (value: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 
@@ -28,6 +36,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Sear
 
   const from = toIata(read("from") ?? read("q"));
   const to = toIata(read("to"));
+  const origin = toIata(read("origin")) || "CGK";
   const date = /^\d{4}-\d{2}-\d{2}$/.test(read("date") ?? "") ? read("date") : undefined;
   const cabin = read("cabin");
   const filters = parseFilters({ sort: read("sort"), stops: read("stops"), airline: read("airline"), max: read("max") });
@@ -57,7 +66,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Sear
   }
 
   // Tanpa asal/tujuan: tampilkan form dan daftar rute populer dari mitra.
-  const routes = await popularRoutes("CGK", 10);
+  const routes = await popularRoutes(origin, 10);
 
   return (
     <div className="min-h-screen bg-white text-ink">
@@ -81,7 +90,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Sear
             <div>
               <h2 className="flex items-center gap-2 text-[21px] font-extrabold tracking-tight" id="rute-populer">
                 <TrendingDown aria-hidden className="h-[18px] w-[18px] text-brand" />
-                Rute populer dari Jakarta
+                Rute populer dari {cityName(origin)}
               </h2>
               <p className="mt-1.5 text-[12.5px] text-slate-600">
                 Harga terendah yang sedang ditawarkan mitra. Klik untuk melihat daftar lengkapnya.
@@ -94,15 +103,33 @@ export default async function FlightsPage({ searchParams }: { searchParams: Sear
               Data rute populer sedang tidak tersedia. Silakan isi form di atas.
             </p>
           ) : (
-            <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <>
+            <nav aria-label="Pilih kota asal" className="mt-4 flex flex-wrap gap-2">
+              {originOptions.map((item) => (
+                <Link
+                  aria-current={item.code === origin}
+                  className={`inline-flex min-h-9 items-center rounded-lg border px-3 text-[12.5px] font-semibold transition ${
+                    item.code === origin
+                      ? "border-brand bg-brand-soft text-brand"
+                      : "border-hairline bg-white text-slate-600 hover:border-brand/40 hover:text-brand"
+                  }`}
+                  href={`/flights?origin=${item.code}`}
+                  key={item.code}
+                >
+                  {item.city}
+                </Link>
+              ))}
+            </nav>
+
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {routes.map((route) => (
                 <li key={route.code}>
                   <Link
                     className="group flex items-center justify-between gap-3 rounded-xl border border-hairline bg-white p-4 transition hover:border-brand/40 hover:shadow-sm"
-                    href={`/flights?from=CGK&to=${route.code}`}
+                    href={`/flights/${origin.toLowerCase()}-${route.code.toLowerCase()}`}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-[14px] font-bold text-ink">Jakarta → {route.city}</span>
+                      <span className="block truncate text-[14px] font-bold text-ink">{cityName(origin)} → {route.city}</span>
                       <span className="mt-0.5 block text-[11.5px] text-slate-500">
                         {route.transfers === 0 ? "Langsung" : `${route.transfers} transit`}
                         {route.airlineCode ? ` · ${route.airlineCode}` : ""}
@@ -118,6 +145,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Sear
                 </li>
               ))}
             </ul>
+            </>
           )}
 
           <p className="mt-5 text-[11.5px] leading-relaxed text-slate-500">

@@ -71,6 +71,23 @@ Aturan:
 Kode lama tidak dihapus dari repositori agar riwayat dan pengujiannya tetap
 jujur, tetapi navigasi utama tidak lagi menuju ke sana.
 
+## 3b. Halaman rute (Fase 2) — sudah berjalan
+
+| URL | Isi |
+| --- | --- |
+| `/flights/cgk-med` | h1 rute, harga termurah, tabel harga per bulan (klik -> pencarian bertanggal), strip 14 tanggal, 5 tawaran dengan tombol Pilih, rute terkait, 3 FAQ + JSON-LD |
+| `/flights?origin=SUB` | rute populer dari kota asal terpilih + 10 kartu menuju halaman rute |
+| `/sitemap.xml` | 70 URL (7 statis + 63 rute dari 5 origin) |
+| `/robots.txt` | allow `/`, disallow `/admin`, `/api/`, `/bookings`, `/wishlist`, `/login` |
+
+Catatan implementasi:
+
+- Harga per bulan berasal dari **satu** permintaan `prices/latest?limit=30` yang
+  dikelompokkan per bulan di server (bukan 12 permintaan).
+- `sitemap.ts` wajib `dynamic = "force-dynamic"`: bila dirender saat build, token
+  belum ada dan daftar rute kosong ikut ter-cache (pernah terjadi: 0 rute).
+- Slug divalidasi `^[a-z]{3}-[a-z]{3}$`; selain itu `notFound()`.
+
 ## 4. Alur konten & SEO
 
 - Satu artikel per rute/topik (mis. "Tiket Jakarta–Madinah termurah"), memuat
@@ -114,7 +131,9 @@ Verifikasi wajib setelah deploy:
 5. `/v1/airlines` tidak ada -> nama maskapai dipetakan lokal dari kode IATA.
 6. `npm ci` pernah gagal karena lock tidak sinkron (ajv 6 vs 8); lock sudah
    disinkronkan dan build dari clone bersih diverifikasi.
-7. **Jangan mengemas tarball sebelum `next build` benar-benar selesai.** Baris
+7. `sitemap.ts` yang dirender saat build menghasilkan 0 rute karena token belum
+   tersedia; gunakan `export const dynamic = "force-dynamic"`.
+8. **Jangan mengemas tarball sebelum `next build` benar-benar selesai.** Baris
    "Compiled successfully" muncul lebih awal; `.next/standalone` masih ditulis
    setelahnya. Gejalanya: deploy sukses, service aktif, tetapi halaman masih
    memuat kode lama. Selalu periksa `cat .next/BUILD_ID` dan `grep` string baru

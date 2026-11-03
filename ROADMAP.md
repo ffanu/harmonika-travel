@@ -69,11 +69,17 @@ daftar tawaran. Ini kesenjangan terbesar dibanding situs tiket besar.
 - Kriteria selesai: rute CGK→MED menampilkan ≥3 tawaran; filter mengubah hasil;
   tiap baris membuka Aviasales dengan marker kita.
 
-### Fase 2 — Halaman rute & SEO
+### Fase 2 — Halaman rute & SEO — **selesai**
 - `/flights/[from]-[to]` (mis. `/flights/cgk-med`): ringkasan rute, harga
-  termurah per bulan, maskapai yang melayani, FAQ, tautan ke pencarian bertanggal.
-- Sitemap dinamis dari rute populer + artikel.
-- Metadata & JSON-LD (`Product`/`Offer` tidak dipakai; gunakan `ItemList`).
+  termurah per bulan (dari `prices/latest` dikelompokkan per bulan), strip 14
+  tanggal termurah, 5 tawaran terbaru, rute terkait, 3 FAQ + JSON-LD `FAQPage`.
+- `generateMetadata` per rute: judul memuat harga termurah, canonical, deskripsi.
+- `sitemap.xml` dinamis: 7 halaman statis + rute dari 5 kota asal (dihitung per
+  origin, bukan selalu CGK). `force-dynamic` karena saat build token belum ada.
+- `robots.txt` melarang `/admin`, `/api/`, `/bookings`, `/wishlist`, `/login`.
+- Slug tidak valid -> 404.
+- Tambahan di luar rencana: **pemilih kota asal** di `/flights` (CGK, SUB, KNO,
+  UPG, DPS) supaya tidak Jakarta-sentris; kartu rute menaut ke halaman rute.
 
 ### Fase 3 — Hotel & produk lain sebagai tautan
 - Karena API harga hotel 404, halaman hotel menjadi **panduan + tautan Hotellook**

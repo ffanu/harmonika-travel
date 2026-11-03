@@ -437,3 +437,72 @@ export async function popularRoutes(from: string, take = 8) {
     return [];
   }
 }
+
+type LatestFullResponse = {
+  currency?: string;
+  data?: Array<{
+    depart_date?: string;
+    return_date?: string;
+    value?: number;
+    gate?: string;
+    number_of_changes?: number;
+  }>;
+};
+
+/**
+ * Ringkasan satu rute untuk halaman SEO: harga termurah per bulan + jumlah
+ * tawaran yang terlihat. Satu permintaan, dikelompokkan di server.
+ */
+export async function routeOverview(input: { from: string; to: string; limit?: number }) {
+  const params = new URLSearchParams({
+    origin: toIata(input.from),
+    destination: toIata(input.to),
+    period_type: "year",
+    page: "1",
+    limit: String(Math.min(Math.max(input.limit ?? 30, 5), 30)),
+    show_to_affiliates: "true",
+    sorting: "price",
+    currency: "idr",
+  });
+
+  try {
+    const body = await request<LatestFullResponse>(`/v2/prices/latest?${params.toString()}`);
+    const rows = (body.data ?? []).filter(
+      (row) => typeof row.value === "number" && row.value > 0 && row.depart_date,
+    );
+
+    const byMonth = new Map<string, { month: string; priceIdr: number; sampleDate: string; gate: string }>();
+    for (const row of rows) {
+      const month = (row.depart_date as string).slice(0, 7);
+      const current = byMonth.get(month);
+      const price = row.value as number;
+      if (!current || price < current.priceIdr) {
+        byMonth.set(month, { month, priceIdr: price, sampleDate: row.depart_date as string, gate: row.gate ?? "Mitra" });
+      }
+    }
+
+    const monthly = [...byMonth.values()].sort((a, b) => a.month.localeCompare(b.month));
+    const cheapest = rows.reduce<number | null>(
+      (min, row) => (min === null || (row.value as number) < min ? (row.value as number) : min),
+      null,
+    );
+
+    return {
+      monthly,
+      cheapest,
+      sampleSize: rows.length,
+      gates: [...new Set(rows.map((row) => row.gate).filter(Boolean))].slice(0, 6) as string[],
+    };
+  } catch {
+    return { monthly: [], cheapest: null, sampleSize: 0, gates: [] as string[] };
+  }
+}
+
+/** "cgk-med" -> { from: "CGK", to: "MED" } | null */
+export function parseRouteSlug(slug: string) {
+  const match = /^([a-z]{3})-([a-z]{3})$/.exec(slug.toLowerCase());
+  if (!match) return null;
+  return { from: match[1].toUpperCase(), to: match[2].toUpperCase() };
+}
+
+export const routeSlug = (from: string, to: string) => `${from.toLowerCase()}-${to.toLowerCase()}`;
