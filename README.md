@@ -219,3 +219,46 @@ cd .next/standalone && set -a && . ./.env && set +a && node seed-catalog.mjs
 
 Katalog bersama berada di `scripts/catalog-data.mjs`; setiap entri ditandai
 `isDemo` sehingga pengunjung tahu itu data contoh.
+
+## Integrasi afiliasi: Travelpayouts Drive
+
+Script Drive dari dasbor Travelpayouts (partner ID `595040`) dipasang di
+`src/app/layout.tsx` lewat `next/script` dengan `strategy="beforeInteractive"`,
+sehingga ikut terkirim pada HTML awal dan berlaku di **setiap halaman**
+(root layout).
+
+Alamat berkas: `https://emrldtp.com/NTk1MDQw.js?t=595040`.
+
+Dua hal yang sengaja ditambahkan di luar potongan kode asli dasbor:
+
+1. **Penjaga idempoten** `window.__harmonikaTpDrive`. Next.js menjalankan inline
+   script ini dari antrean awal **dan** sekali lagi saat hidrasi; tanpa penjaga,
+   berkas Travelpayouts dimuat dua kali per halaman (terukur: 2x sebelum
+   perbaikan, 1x sesudahnya).
+2. **`data-cfasync="false"`** agar Cloudflare Rocket Loader tidak menunda
+   eksekusinya (situs ini di belakang Cloudflare).
+
+### Cara memverifikasi
+
+Jangan uji dengan `curl` polos: WAF `emrldtp.com` membalas **403** untuk klien
+ tanpa User-Agent/Referer normal. Gunakan browser (atau `curl` dengan UA +
+`Referer`). Penanda berhasil:
+
+- `document.getElementById('travelpayouts-drive')` ada di `<head>`;
+- Network memuat `NTk1MDQw.js` **satu kali**, lalu `chunk.RgDlCtYM.js` dan
+  beberapa chunk lain (total ~209 KB);
+- `GET https://emrldtp.com/entrypoint_config?...&t=595040` membalas **200**
+  dengan `access-control-allow-origin: *`;
+- Console menulis `[tp] entrypoint init` tanpa error;
+- `window.TPAM_SCRIPT_HASH` dan `window.TPAM_GET_ERRORS` tersedia.
+
+Respons `entrypoint_config` juga mengonfirmasi project: `trs: 595040`,
+`domain: www.harmonikatravel.com`. Apex (`harmonikatravel.com`) dilayani project
+yang sama, sehingga tidak perlu pemasangan terpisah.
+
+### Catatan privasi
+
+Drive memasang cookie/token afiliasi setelah interaksi pengguna. Atribut
+`data-cmp-ab="2"` dipertahankan agar script menghormati CMP bila nanti
+dipasang. Bila Anda mengaktifkan banner consent, uji ulang dengan banner
+menolak: script seharusnya tidak boleh menulis cookie sebelum izin.

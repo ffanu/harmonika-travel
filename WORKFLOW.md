@@ -239,3 +239,37 @@ Bagian ini mencatat apa yang berubah pada beranda dan cara memverifikasinya.
   tiket.
 - Foto dibuat khusus untuk proyek ini, bukan aset Traveloka.
 - `harmonikatravel.com` dan `www.harmonikatravel.com` sama-sama dilayani aplikasi ini.
+
+## 8. Travelpayouts Drive (afiliasi)
+
+### 8.1 Pemasangan
+
+| Item | Nilai |
+| --- | --- |
+| Berkas | `src/app/layout.tsx` (root layout) |
+| Strategi | `next/script`, `beforeInteractive` |
+| Script | `https://emrldtp.com/NTk1MDQw.js?t=595040` |
+| Partner | `595040`, project `www.harmonikatravel.com` |
+| Cakupan | semua halaman (beranda, kategori, login, detail produk, admin) |
+
+### 8.2 Hasil pengukuran (Chromium, UA Chrome 131, viewport 1440 dan 390)
+
+| Pemeriksaan | Hasil |
+| --- | --- |
+| Script tag di `<head>` | ada (`#travelpayouts-drive`) |
+| Muat entrypoint per hard load | **1x** (sebelum perbaikan: 2x) |
+| Muat ulang saat navigasi internal (Beranda ke Promo) | **0x** |
+| `entrypoint_config` | **200**, `access-control-allow-origin: *` |
+| Console | `[tp] entrypoint init`, tanpa error |
+| Global | `TPAM_SCRIPT_HASH`, `TPAM_GET_ERRORS` |
+| Mobile 390 px | 1x muat, tanpa error, tanpa gulir horizontal |
+
+### 8.3 Jebakan yang perlu diingat
+
+- `emrldtp.com` membalas 403 untuk klien tanpa User-Agent/Referer wajar. Uji
+  memakai browser, bukan `curl` polos.
+- Tanpa penjaga `window.__harmonikaTpDrive`, Next menjalankan inline script dua
+  kali (antrean awal dan hidrasi) sehingga entrypoint dimuat ganda.
+- Drive hanya mengubah tautan yang menuju merchant mitra. Selama katalog masih
+  demo tanpa tautan afiliasi, belum ada tautan yang dimonetisasi; yang berjalan
+  adalah pemuatan script dan endpoint konfigurasi.
