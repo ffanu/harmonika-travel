@@ -17,19 +17,43 @@ dan `WORKFLOW.md` di direktori yang sama.
 
 | Batas | Nilai |
 | --- | --- |
-| Halaman yang dijangkau | 30 (batas `max_pages` tool), **bukan** seluruh situs |
+| Halaman yang dijangkau | **30** (batas `max_pages` tool), **bukan** seluruh situs |
+| API call teramati | **274** (hanya dicatat sebagai jejak; tidak ada yang dipanggil ulang atau dipakai) |
 | Autentikasi | tidak ada sesi login, jadi tidak ada halaman akun/transaksi |
 | Hasil halaman | banyak menghasilkan **konten kosong** karena render client-side dan anti-bot |
 | CRUD privat | **tidak terverifikasi** |
 | Alur transaksi & pembayaran | **tidak terverifikasi** |
 | Endpoint API internal | tidak diakses; tidak ada API privat yang dipakai |
 
-### 1.2 Menu kategori yang terlihat
+### 1.2 Path yang benar-benar terekam (30 halaman)
+
+```
+/en-en
+/en-en/promotion
+/en-en/download-app
+/en-en/partnership
+/en-en/retrieve/flight/forgot        # pencarian booking lewat kode referensi
+/en-en/hotel
+/en-en/flight
+/en-en/airport-transfer
+/en-en/car-rental
+/en-en/activities
+/en-en/cruise
+/en-en/hotel/{indonesia,thailand,vietnam,malaysia,japan,philippines}
+/en-en/hotel/united-states-of-america/<8 hotel>
+/en-en/activities/united-states-of-america/product/<5 produk>
+```
+
+Pola yang dapat disimpulkan dari path di atas (dan yang **diadopsi** di aplikasi ini):
+kategori sebagai segmen pertama, lalu negara/kota, lalu slug produk. Karena itu struktur
+Harmonika Travel memakai `/flights`, `/hotels`, `/trips`, `/products/[slug]`.
+
+### 1.3 Menu kategori yang terlihat
 
 Hotel · Pesawat · Airport Transfer · Rental Mobil · Aktivitas · Cruise · Promo · Kemitraan ·
 Pencarian booking (kode referensi).
 
-### 1.3 Pola UI yang terlihat (umum di industri, bukan aset Traveloka)
+### 1.4 Pola UI yang terlihat (umum di industri, bukan aset Traveloka)
 
 - Navigasi kategori di header.
 - Kotak pencarian utama: lokasi/tujuan, tanggal, jumlah tamu atau penumpang.
