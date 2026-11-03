@@ -238,4 +238,4 @@ Bagian ini mencatat apa yang berubah pada beranda dan cara memverifikasinya.
 - Katalog masih data demo (`isDemo: true`); tidak ada pembayaran atau penerbitan
   tiket.
 - Foto dibuat khusus untuk proyek ini, bukan aset Traveloka.
-- `harmonikatravel.com` (tanpa `www`) belum diarahkan ke aplikasi ini.
+- `harmonikatravel.com` dan `www.harmonikatravel.com` sama-sama dilayani aplikasi ini.

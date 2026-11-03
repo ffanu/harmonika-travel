@@ -13,7 +13,7 @@ Bahasa antarmuka: Indonesia. Mata uang: IDR.
 | --- | --- |
 | Source code | lengkap, lint 0 error, `tsc --noEmit` 0 error, `next build` sukses |
 | Database | PostgreSQL produksi, 14 tabel, migrasi `0001_init` tercatat di `_prisma_migrations` |
-| Deploy | **live** di `https://www.harmonikatravel.com` (systemd `harmonikatravel.service`, loopback 3401, reverse proxy nginx) |
+| Deploy | **live** di `https://www.harmonikatravel.com` dan `https://harmonikatravel.com` (systemd `harmonikatravel.service`, loopback 3401, reverse proxy nginx, sertifikat mencakup kedua nama) |
 | Data katalog | **demo** (`isDemo = true`), bukan inventori nyata |
 | Pembayaran | **tidak ada** payment gateway; booking tetap `PENDING`, tidak pernah ditandai lunas |
 | Tiket nyata | tidak diterbitkan |
@@ -116,7 +116,7 @@ Terhadap domain produksi, memakai akun uji yang dibuat saat pengujian:
 ```
 /home/www.harmonikatravel.com/app/.next/standalone   # server.js + node_modules + .env
 systemd: harmonikatravel.service (User=www-data, PORT=3401, 127.0.0.1, MemoryMax=1G)
-nginx:   sites-available/www.harmonikatravel.com.conf -> proxy_pass 127.0.0.1:3401
+nginx:   sites-available/www.harmonikatravel.com.conf -> proxy_pass 127.0.0.1:3401 (server_name: www + apex)
 db:      www_harmonikatravel_com (PostgreSQL 14, user pocong)
 ```
 
