@@ -1,4 +1,5 @@
 import { CategoryCatalog, parseSearchDay, searchCategory } from "@/components/category-catalog";
+import { DealRail } from "@/components/deal-rail";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,8 @@ export default async function FlightsPage({
       notice={result.notice}
       query={q}
       title="Tiket pesawat"
-    />
+    >
+      {q || date ? null : <DealRail />}
+    </CategoryCatalog>
   );
 }

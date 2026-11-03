@@ -1,4 +1,5 @@
 import { CategoryCatalog, parseSearchDay, searchCategory } from "@/components/category-catalog";
+import { HotelAffiliateBand } from "@/components/deal-rail";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,8 @@ export default async function HotelsPage({
       notice={result.notice}
       query={q}
       title="Booking hotel"
-    />
+    >
+      {q || date ? null : <HotelAffiliateBand />}
+    </CategoryCatalog>
   );
 }

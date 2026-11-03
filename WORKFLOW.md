@@ -273,3 +273,46 @@ Bagian ini mencatat apa yang berubah pada beranda dan cara memverifikasinya.
 - Drive hanya mengubah tautan yang menuju merchant mitra. Selama katalog masih
   demo tanpa tautan afiliasi, belum ada tautan yang dimonetisasi; yang berjalan
   adalah pemuatan script dan endpoint konfigurasi.
+
+## 9. Harga mitra lewat API Travelpayouts
+
+### 9.1 Pemasangan
+
+| Item | Nilai |
+| --- | --- |
+| Berkas data | `src/lib/travelpayouts.ts` |
+| Tampilan | `src/components/deal-rail.tsx` |
+| Halaman | `/flights` (harga tiket), `/hotels` (band hotel) |
+| Endpoint cek | `GET /api/deals` |
+| Env | `TRAVELPAYOUTS_TOKEN`, `TRAVELPAYOUTS_MARKER=595040` |
+
+### 9.2 Hasil pengukuran (produksi, 2026-11-03)
+
+| Pemeriksaan | Hasil |
+| --- | --- |
+| `/api/deals` | `ok: true`, 4 rute (DPS, SIN, JED, MED) |
+| Harga yang tampil | Rp 2.513.556 (DPS) sampai Rp 13.486.444 (MED), mata uang IDR |
+| Klik kartu pertama | mendarat di `aviasales.com/search/CGK0911DPS1?...&marker=595040`, HTTP 200 |
+| Band hotel | 4 tautan Hotellook ber-marker (`Madinah`, `Mekkah`, `Bali`, `Jakarta`) |
+| Token di HTML `/flights` | **0 kemunculan** |
+| Token di respons `/api/deals` | **0 kemunculan** |
+| Overflow desktop 1440 dan mobile 390 | 0 px, teks tidak terpotong |
+| Ukuran kartu | 392x173 (desktop), 350x173 (mobile) |
+| Error konsol | 0 (dengan UA browser normal) |
+
+### 9.3 Keputusan desain
+
+- **Satu kartu per destinasi.** Pengurutan murni harga membuat semua kartu
+  terisi Denpasar; kini tiap destinasi menampilkan harga termurahnya agar rute
+  Umrah tetap terlihat.
+- **Terpisah dari katalog demo.** Bagian ini berlabel "harga mitra" supaya
+  pengunjung bisa membedakan harga mitra nyata dari katalog contoh.
+- **Gagal dengan tenang.** Timeout 8 detik, cache 15 menit, `allSettled` per
+  rute; kegagalan total hanya memunculkan catatan, halaman tetap 200.
+
+### 9.4 Batasan
+
+- Hotellook API v2 membalas 404 untuk token saat ini, jadi harga kamar belum
+  tampil langsung; yang dipakai adalah tautan pencarian.
+- Harga adalah data historis/terbaru dari mitra (bukan tarif real-time per
+  detik) dan bisa berubah saat pengguna membuka Aviasales.

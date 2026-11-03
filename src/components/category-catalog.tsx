@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Category, Prisma } from "@prisma/client";
 import { ArrowRight, MapPin, SearchX } from "lucide-react";
 import { db } from "@/lib/db";
@@ -175,6 +176,7 @@ export function CategoryCatalog({
   dateText,
   notice,
   basePath,
+  children,
 }: {
   eyebrow: string;
   title: string;
@@ -184,6 +186,7 @@ export function CategoryCatalog({
   dateText?: string;
   notice?: string;
   basePath: string;
+  children?: ReactNode;
 }) {
   const hasFilter = Boolean(query || dateText);
 
@@ -232,6 +235,8 @@ export function CategoryCatalog({
             ) : null}
           </div>
         </section>
+
+        {children}
 
         <section className="mx-auto max-w-[1240px] px-5 py-10">
           {notice ? (

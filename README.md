@@ -262,3 +262,57 @@ Drive memasang cookie/token afiliasi setelah interaksi pengguna. Atribut
 `data-cmp-ab="2"` dipertahankan agar script menghormati CMP bila nanti
 dipasang. Bila Anda mengaktifkan banner consent, uji ulang dengan banner
 menolak: script seharusnya tidak boleh menulis cookie sebelum izin.
+
+## Harga mitra: Travelpayouts API
+
+Selain Drive (skrip di browser), situs memakai **API Travelpayouts** dari sisi
+server untuk menampilkan harga tiket nyata dan tautan afiliasi.
+
+| Item | Nilai |
+| --- | --- |
+| Kode | `src/lib/travelpayouts.ts` |
+| Tampilan | `src/components/deal-rail.tsx` (`DealRail`, `HotelAffiliateBand`) |
+| Dipakai di | `/flights` (harga tiket), `/hotels` (band hotel) |
+| Endpoint cek | `GET /api/deals` |
+| Env | `TRAVELPAYOUTS_TOKEN`, `TRAVELPAYOUTS_MARKER` |
+
+### Perilaku
+
+- Token hanya dibaca di server (`process.env`) dan **tidak pernah** dikirim ke
+  browser: sudah diuji, string token 0 kemunculan di HTML `/flights` maupun di
+  respons `/api/deals`.
+- Permintaan memakai `revalidate: 900` (15 menit) dan batas waktu 8 detik.
+- Satu rute gagal tidak menggagalkan rute lain (`Promise.allSettled`). Bila
+  semua gagal, halaman menampilkan catatan "harga mitra sedang tidak dapat
+  dimuat" dan katalog demo tetap bisa dipakai.
+- Harga diambil per destinasi (harga termurah), supaya rute mahal seperti
+  Madinah/Jeddah tetap tampil, tidak tertutup rute murah seperti Denpasar.
+- Tautan keluar memakai `rel="noopener noreferrer nofollow sponsored"` dan
+  `target="_blank"`, dengan `marker=595040` serta `currency=idr`.
+
+### Format tautan afiliasi
+
+| Tujuan | Format |
+| --- | --- |
+| Penerbangan | `https://www.aviasales.com/search/{ORIGIN}{DDMM}{DEST}1?marker=595040` |
+| Hotel | `https://search.hotellook.com/hotels?location={Kota}&adults=2&currency=idr&marker=595040` |
+
+Format `{ORIGIN}{DDMM}{DEST}{PAX}` diverifikasi menghasilkan HTTP 200 di
+Aviasales. Format `/flights/CGK-MED` **tidak** valid (404), jadi jangan dipakai.
+
+### Yang belum tersedia
+
+Hotellook API v2 (`engine.hotellook.com/api/v2/*`) membalas 404 untuk token ini,
+jadi harga kamar belum bisa ditampilkan langsung. Yang dipakai adalah tautan
+pencarian Hotellook. Bila program hotel diaktifkan di dasbor, endpoint itu bisa
+mulai bekerja; uji ulang sebelum mengandalkannya.
+
+### Mengganti token
+
+```bash
+ssh -p 2016 root@103.157.24.189
+nano /home/www.harmonikatravel.com/app/.next/standalone/.env   # ganti TRAVELPAYOUTS_TOKEN
+chmod 600 /home/www.harmonikatravel.com/app/.next/standalone/.env
+systemctl restart harmonikatravel.service
+curl -s http://127.0.0.1:3401/api/deals | head -c 200
+```
