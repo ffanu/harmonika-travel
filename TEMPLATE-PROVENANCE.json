@@ -1,0 +1,9 @@
+{
+  "upstream": "https://z-cdn.chatglm.cn/fullstack/code_1785226337571.tar",
+  "sha256": "c41039da4901e04b34ab91cd1ef9e2e1b47bbe119ec535ebfe67bfae6e6287ae",
+  "adapted_by": "Harmonika AI",
+  "upstream_installers_included": false,
+  "port_3000_forbidden": true,
+  "ai_credentials_provisioned": false,
+  "dependency_install_or_build_executed": false
+}
