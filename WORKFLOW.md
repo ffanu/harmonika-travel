@@ -196,3 +196,46 @@ Setiap perubahan menulis `AuditLog`.
    terverifikasi sehingga tidak diklaim.
 5. **Sertifikat TLS hanya untuk `www`.** Apex `harmonikatravel.com` belum tercakup sertifikat
    saat deploy ini; menambahkannya butuh penerbitan sertifikat baru.
+
+## 7. Beranda baru: alur yang bisa diuji ulang
+
+Bagian ini mencatat apa yang berubah pada beranda dan cara memverifikasinya.
+
+### 7.1 Alur pengguna
+
+1. Pengunjung membuka `/`. Hero menampilkan foto Mekkah, judul, dan subjudul.
+2. Widget pencarian menawarkan 6 tab: Pesawat, Hotel, Umrah & Haji, Paket
+   Wisata, Sewa Mobil, Aktivitas. Setiap tab menampilkan bidang yang relevan
+   saja (tanggal pulang hanya untuk pesawat, jam sewa untuk mobil, dan
+   seterusnya).
+3. Menekan tombol CTA mengarahkan ke halaman kategori dengan parameter
+   pencarian; hasil disaring **di server**.
+4. Bila kata kunci atau tanggal tidak menghasilkan apa pun, halaman menampilkan
+   keadaan kosong dengan tautan "Lihat semua pilihan", atau catatan bahwa yang
+   ditampilkan adalah jadwal terdekat.
+5. Kartu destinasi mengarah ke pencarian per kota; kartu produk mengarah ke
+   halaman detail produk.
+
+### 7.2 Pemeriksaan yang dijalankan pada rilis ini
+
+| Pemeriksaan | Hasil |
+| --- | --- |
+| 11 rute utama (`/`, `/flights`, `/hotels`, `/trips`, `/promos`, `/blog`, `/login`, `/bookings`, `/wishlist`, `/partnership`, `/admin`) | semua HTTP 200 |
+| Judul hero | `Perjalanan Nyaman, Aman, dan Penuh Makna` |
+| Tab pencarian | 6, dengan bidang yang berbeda per tab |
+| Trust bar | 5 butir, teks tidak terpotong |
+| Carousel promo | 3 kartu, tombol sebelumnya/berikutnya, 3 indikator |
+| Grid destinasi | 5 kartu (Mekkah, Madinah, Bali, Labuan Bajo, Tokyo) |
+| Rail produk | 4 produk dari basis data |
+| Gambar rusak | 0 |
+| Pencarian `Madinah (MED)` + tanggal | 1 hasil, chip "Pencarian" dan "Tanggal" tampil |
+| Tanggal tanpa jadwal | catatan jadwal terdekat tampil |
+| Mobile 390 px | tanpa gulir horizontal, menu hamburger berisi 7 tautan |
+| Error konsol | 0 (satu 401 `/api/wishlist` adalah perilaku lama saat belum login dan ditangani halaman) |
+
+### 7.3 Batasan yang tetap berlaku
+
+- Katalog masih data demo (`isDemo: true`); tidak ada pembayaran atau penerbitan
+  tiket.
+- Foto dibuat khusus untuk proyek ini, bukan aset Traveloka.
+- `harmonikatravel.com` (tanpa `www`) belum diarahkan ke aplikasi ini.

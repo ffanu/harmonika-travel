@@ -158,3 +158,64 @@ tablet 834, mobile 390, mobile kecil 360). Hasil akhir: **13/13 cek lolos, 0 err
 `lang`, judul dokumen, satu `h1`, `alt` gambar, gambar termuat, input berlabel, id duplikat,
 kontras teks (WCAG AA, warna `lab()`/`color(srgb)` dinormalkan), ukuran teks, dan tap target
 minimum 24px.
+
+## Desain beranda (mengikuti mockup)
+
+Beranda dibangun ulang mengikuti mockup yang diberikan pemilik produk. Semua
+teks, warna, dan gambar berada di repositori ini; tidak ada aset milik pihak
+lain yang disalin.
+
+| Bagian | Berkas |
+| --- | --- |
+| Header lengket + wordmark + menu seluler | `src/components/site-header.tsx`, `src/components/brand-logo.tsx` |
+| Hero foto + judul + subjudul | `src/app/page.tsx`, `public/images/hero-mecca.webp` |
+| Widget pencarian 6 tab yang benar-benar mengarahkan ke katalog | `src/components/search-widget.tsx` |
+| Trust bar 5 butir | `src/components/trust-bar.tsx` |
+| Carousel promo (geser, tombol, indikator) | `src/components/promo-carousel.tsx` |
+| Grid "Destinasi Populer" | `src/components/destination-grid.tsx` |
+| Rail produk dari basis data | `src/components/product-rail.tsx` |
+| Footer gelap + kontak WhatsApp | `src/components/site-footer.tsx` |
+| Isi teks/tautan/opsi | `src/lib/home-content.ts` |
+
+Token warna brand ada di `src/app/globals.css` (`--color-brand`, `--color-sun`,
+`--color-ink`, `--color-mist`, `--color-hairline`).
+
+### Gambar
+
+Sembilan foto dibuat khusus untuk proyek ini (hero Mekkah, tiga kartu promo,
+lima destinasi) ditambah empat foto kategori (kamar hotel, mobil transfer,
+Jakarta, Singapura). Sumber PNG disimpan di `public/images/`; versi WebP
+dihasilkan oleh:
+
+```bash
+node scripts/images-to-webp.mjs
+```
+
+Halaman memakai berkas WebP (total ~470 KB untuk 13 gambar). PNG tidak perlu
+diunggah ke server: `scripts/deploy.sh` mengecualikannya dari arsip.
+
+### Pencarian
+
+Widget mengirim pengguna ke halaman kategori dengan parameter `q`, `date`,
+`return`, dan `pax`. Halaman `/flights`, `/hotels`, dan `/trips` membaca
+parameter itu di server (bukan difilter di browser) melalui `searchCategory()`
+di `src/components/category-catalog.tsx`.
+
+Dua perilaku yang disengaja:
+
+1. Kata kunci dari pemilih bandara (mis. `Madinah (MED)`) dicari dalam bentuk
+   utuh **dan** tanpa kode bandara, sehingga cocok dengan nama produk.
+2. Bila tanggal yang diminta tidak punya jadwal, hasil tanpa filter tanggal
+   dikembalikan bersama catatan bahwa yang tampil adalah jadwal terdekat.
+
+### Menambah katalog tanpa menyentuh akun
+
+`scripts/seed.mjs` membuat admin + katalog. Untuk menambah/menyegarkan katalog
+saja (mis. rute Arab Saudi dan paket Umrah) gunakan:
+
+```bash
+cd .next/standalone && set -a && . ./.env && set +a && node seed-catalog.mjs
+```
+
+Katalog bersama berada di `scripts/catalog-data.mjs`; setiap entri ditandai
+`isDemo` sehingga pengunjung tahu itu data contoh.

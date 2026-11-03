@@ -24,7 +24,7 @@ npm run build
 
 echo "==> package"
 rm -f "$ARCHIVE"
-tar czf "$ARCHIVE" .next/standalone prisma scripts/seed.mjs
+tar czf "$ARCHIVE" --exclude=".next/standalone/public/images/*.png" .next/standalone prisma scripts/seed.mjs scripts/seed-catalog.mjs scripts/catalog-data.mjs
 gzip -t "$ARCHIVE" # fail fast on a truncated archive
 ls -la "$ARCHIVE" | awk '{printf "    archive: %.1f MB\n", $5/1048576}'
 
@@ -51,7 +51,9 @@ if [ "\$KEEP" = "1" ]; then
 else
   echo "PERINGATAN: .env belum ada di \$STANDALONE; aplikasi tidak akan bisa konek DB." >&2
 fi
-cp "\$APP/scripts/seed.mjs" "\$STANDALONE/seed.mjs" 2>/dev/null || true
+for helper in seed.mjs seed-catalog.mjs catalog-data.mjs; do
+  cp "\$APP/scripts/\$helper" "\$STANDALONE/\$helper" 2>/dev/null || true
+done
 chown -R www-data:www-data "\$APP"
 systemctl restart "$SERVICE"
 sleep 6
