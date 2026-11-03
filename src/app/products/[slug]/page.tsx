@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 type Schedule = {
   id: string;
@@ -153,15 +155,14 @@ export default function ProductPage() {
 
   const field = "rounded-lg border border-slate-400 p-3";
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-5 py-10">
-      <nav
-        aria-label="Navigasi"
-        className="mb-8 flex flex-wrap gap-5 text-sky-800"
-      >
-        <a href="/">Harmonika Travel</a>
-        <a href="/bookings">Pesanan saya</a>
-        <a href="/login">Masuk</a>
-      </nav>
+    <div className="min-h-screen bg-white text-ink">
+      <SiteHeader />
+      <main className="mx-auto max-w-[1000px] px-5 py-10">
+        <nav aria-label="Remah" className="mb-6 flex flex-wrap items-center gap-2 text-[12.5px] text-slate-500">
+          <a className="hover:text-brand" href="/">Beranda</a>
+          <span aria-hidden>/</span>
+          <a className="hover:text-brand" href="/trips">Paket perjalanan</a>
+        </nav>
       {loading && <p role="status">Memuat produk…</p>}
       {error && (
         <p role="alert" className="mb-5 rounded-lg bg-red-50 p-4 text-red-900">
@@ -304,6 +305,8 @@ export default function ProductPage() {
           </section>
         </>
       )}
-    </main>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
